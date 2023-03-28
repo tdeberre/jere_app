@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 
 class DB {
   static Future<void> init() async {
-    _cards = jsonDecode(await getDataFromServ("cards")).cast<String, dynamic>();
+    _cards = jsonDecode(await getDataFromServ("api/cards")).cast<String, dynamic>();
   }
 
   static Map<String, dynamic> get cards => _cards;
@@ -27,7 +27,9 @@ class User {
   static Future<void> init(username, password) async {
     User.username = username;
     User.password = password;
-    String data = await getDataFromServ("decks/${User.username}");
+    User.token = await postDataToServ("api/token", '{"username":"$username","password":"$password"}');
+    _refreshToken();
+    String data = await getDataFromServ("api/decks/${User.username}");
     if (data == "null") {
       throw "Error: User not found";
     }
@@ -37,15 +39,21 @@ class User {
 
   static late String username;
   static late String password;
+  static late String token;
   static String activeDeck = "";
   static Map<String, dynamic> get decks => _decks;
   static set decks(Map<String, dynamic> decks) {
     _decks = decks;
-    postDataToServ("decks/${User.username}", jsonEncode(_decks));
+    postDataToServ("api/decks/${User.username}", jsonEncode(_decks));
   }
 }
 
 Map<String, dynamic> _decks = {}; //accessors in User
+_refreshToken() async {
+  Timer.periodic(const Duration(minutes: 14), (timer) async {
+    User.token = await postDataToServ("api/token", '{"username":"${User.username}","password":"${User.password}"}');
+  });
+}
 
 Future<String> getDataFromServ(String path) async {
   String url = "http://localhost:56561/$path";
@@ -55,10 +63,10 @@ Future<String> getDataFromServ(String path) async {
       throw ("Error: ${response.reasonPhrase}");
     }
     print(path);
-    print(response.body);
+    print("${response.statusCode}: ${response.body}");
     return response.body;
   } catch (e) {
-    throw e;
+    rethrow;
   }
 }
 
@@ -73,6 +81,6 @@ Future<String> postDataToServ(String path, String body) async {
     print("${response.statusCode}: ${response.body}");
     return response.body;
   } catch (e) {
-    throw e;
+    rethrow;
   }
 }

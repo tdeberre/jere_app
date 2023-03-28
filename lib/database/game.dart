@@ -23,7 +23,7 @@ class Game {
 
   Future<void> connect() async {
     socket = await Socket.connect("localhost", 56562);
-    String creds = jsonEncode({"name": User.username, "pwd": User.password, "deck": User.decks[User.activeDeck]});
+    String creds = jsonEncode({"token": User.token, "deck": User.decks[User.activeDeck]});
     print(creds);
     socket.write(creds);
     socket.listen(

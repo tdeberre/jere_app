@@ -23,6 +23,6 @@ class _SplashState extends State<Splash> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.orange, child: FlutterLogo(size: MediaQuery.of(context).size.height));
+    return Container(color: Colors.orange, child: Icon(Icons.settings, size: MediaQuery.of(context).size.height / 2));
   }
 }
