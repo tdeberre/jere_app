@@ -12,13 +12,11 @@ class Game {
   late Socket socket;
 
   void draw() {
-    socket.write("draw");
-    print("draw");
+    postDataToServ("draw", jsonEncode({'token': '${User.token}'}));
   }
 
   void play(String card) {
-    socket.write("play $card");
-    print("play");
+    postDataToServ("play", jsonEncode({'token': '${User.token}', 'card': '$card'}));
   }
 
   Future<void> connect() async {

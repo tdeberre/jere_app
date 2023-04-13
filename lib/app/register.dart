@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jere_app/database/database.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final formKey = GlobalKey<FormState>();
   String email = '';
   String password = '';
@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        title: const Text("Register"),
       ),
       body: Center(
         child: Form(
@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: TextFormField(
-                  decoration: const InputDecoration(labelText: "Username"),
+                  decoration: const InputDecoration(labelText: "Email"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Enter Email';
@@ -56,23 +56,39 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: TextFormField(
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: "Validate Password"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Enter password again';
+                    } else {
+                      if (value != password) {
+                        return "Passord dont match";
+                      }
+                    }
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: ElevatedButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      tryCo(context, email, password);
+                      register(context, email, password);
                     }
                   },
-                  child: const Text("Login"),
+                  child: const Text("Register"),
                 ),
               ),
               const Text('or'),
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/register'),
-                  child: const Text('Register'),
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                  child: const Text('Login'),
                 ),
               ),
             ],
@@ -83,11 +99,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-void tryCo(BuildContext context, String username, String password) async {
+void register(BuildContext context, String username, String password) async {
   try {
-    await User.init(username, password);
+    postDataToServ("register", '{"email":"$username","password":"$password"}');
     //ignore:use_build_context_synchronously
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/login');
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(e.toString()),

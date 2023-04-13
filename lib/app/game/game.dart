@@ -10,6 +10,8 @@ class GamePage extends StatefulWidget {
   State<GamePage> createState() => _GamePageState();
 }
 
+int active = 0;
+
 class _GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class _GamePageState extends State<GamePage> {
                 Column(
                   children: [
                     LinearProgressIndicator(
-                      value: gameState["hpEnemy"] / 100,
+                      value: (gameState["hpEnemy"] / 100),
                       minHeight: 20,
                     ),
                     Column(
@@ -44,23 +46,52 @@ class _GamePageState extends State<GamePage> {
                   children: [
                     Column(
                       children: [
-                        Row(
-                          children: mkHand(gameState["hand"].cast<String>(), gameState),
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                square(gameState, 0),
+                                square(gameState, 1),
+                                square(gameState, 2),
+                              ],
+                            ),
+                            const Padding(padding: EdgeInsets.all(10)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                square(gameState, 3),
+                                square(gameState, 4),
+                                square(gameState, 5),
+                              ],
+                            ),
+                          ],
+                          // children: mkHand(gameState["hand"].cast<String>(), gameState),
                         ),
                         Container(
                           height: 100,
                           width: double.infinity,
                           color: Theme.of(context).colorScheme.background,
-                          child: ElevatedButton(
-                            child: const Text('draw'),
-                            onPressed: () => setState(() {
-                              game!.draw();
-                            }),
-                          ),
+                          child: (gameState["hand"].isEmpty)
+                              ? ElevatedButton(
+                                  child: const Text('draw'),
+                                  onPressed: () => setState(() {
+                                    game!.draw();
+                                  }),
+                                )
+                              : (gameState["hand"].length - 1 < active)
+                                  ? ElevatedButton(
+                                      child: const Text('draw'),
+                                      onPressed: () => setState(() {
+                                        game!.draw();
+                                      }),
+                                    )
+                                  : Text(DB.cards[gameState["hand"][active]]["effect"]),
                         ),
                       ],
                     ),
                     LinearProgressIndicator(
+                      color: Colors.lightBlue,
                       value: gameState["hp"] / 100,
                       minHeight: 20,
                       semanticsLabel: "vie",
@@ -80,42 +111,39 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  mkHand(List<String> hand, Map gameState) {
-    List<Widget> list = [];
-    for (String card in hand) {
-      list += [
-        GestureDetector(
-            onTap: () => setState(() {
-                  DB.cards[card].cast<String, dynamic>()["fonc"];
-                  gameState["hand"].remove(card);
-                }),
-            child: CustomCard(
-              name: card,
-            ))
-      ];
+  square(gamestate, num) {
+    String text;
+    if (gamestate["hand"].isNotEmpty) {
+      if (gamestate["hand"].length - 1 >= num) {
+        text = gamestate["hand"][num];
+      } else {
+        text = "empty";
+      }
+    } else {
+      text = "empty";
     }
-    return list;
-  }
-}
 
-class CustomCard extends StatelessWidget {
-  const CustomCard({super.key, required this.name, this.width = 100, this.height = 100});
-  final String name;
-  final double width;
-  final double height;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(10)),
-      width: width,
-      height: height,
-      margin: const EdgeInsets.all(10),
-      child: Column(children: [
-        const Text("icon"),
-        Text(name),
-        //get card effect
-        Text(DB.cards[name]["effect"]),
-      ]),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          active = num;
+        });
+      },
+      onDoubleTap: () {
+        try {
+          game!.play(gamestate["hand"][num]);
+        } catch (e) {}
+      },
+      child: Container(
+        height: 100,
+        width: 100,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          border: active == num ? Border.all(color: Colors.orange, width: 2) : null,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(text),
+      ),
     );
   }
 }

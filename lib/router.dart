@@ -8,6 +8,7 @@ import 'app/decks/decks.dart';
 import 'app/decks/builder/builder.dart';
 import 'app/game/game.dart';
 import 'app/login.dart';
+import 'app/register.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -17,6 +18,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (BuildContext context) => const MyHomePage());
       case "/login":
         return MaterialPageRoute(builder: (BuildContext context) => const LoginPage());
+      case "/register":
+        return MaterialPageRoute(builder: (BuildContext context) => const RegisterPage());
       case "/game":
         return MaterialPageRoute(builder: (BuildContext context) => const GamePage());
       case "/decks":
